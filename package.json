@@ -1,0 +1,50 @@
+{
+  "name": "gremlin-aws-sigv4",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "lint": "eslint ./",
+    "test": "jest test/unit",
+    "test:unit": "jest test/unit --collectCoverage false",
+    "test:e2e": "jest test/e2e --collectCoverage false",
+    "docker:start": "docker run -d --name gremlin-server-aws-sigv4 -p 8182:8182 jbmusso/gremlin-server:3.2.4",
+    "docker:stop": "docker stop gremlin-server-aws-sigv4 && docker rm gremlin-server-aws-sigv4",
+    "test:cover": "npm run docker:start && jest test --collectCoverage true; npm run docker:stop",
+    "test:cover:check": "istanbul check-coverage  --statements 100  --branches 100  --functions 100  --lines 100"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.shuttercorp.net/editorial-tech/gremlin-aws-sigv4.git"
+  },
+  "keywords": [
+    "aws",
+    "graph",
+    "gremlin",
+    "javascript",
+    "neptune",
+    "sigv4"
+  ],
+  "author": "Fabrice Lamant <flamant@shutterstock.com>",
+  "license": "MIT",
+  "dependencies": {
+    "gremlin": "3.2.9",
+    "moment-timezone": "0.5.21",
+    "websocket": "1.0.26"
+  },
+  "devDependencies": {
+    "eslint": "^5.4.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.14.0",
+    "istanbul": "^0.4.5",
+    "jest": "^23.5.0"
+  },
+  "jest": {
+    "collectCoverageFrom": [
+      "**/*.js"
+    ],
+    "coveragePathIgnorePatterns": [
+      "coverage"
+    ],
+    "collectCoverage": true
+  }
+}
