@@ -1,4 +1,5 @@
 /* eslint no-underscore-dangle: 0 */
+const EventEmitter = require('events');
 const AwsSigV4DriverRemoteConnection = require('../../../lib/driver/aws-sigv4-driver-remote-connection');
 
 jest.mock('websocket', () => ({
@@ -61,6 +62,22 @@ describe('AwsSigV4DriverRemoteConnection', () => {
         expect(connection).toEqual(undefined);
       }).toThrow('Access key and secret key are required');
     });
+
+    it('should resolve the open promise if exist on connection', () => {
+      const host = 'local.host';
+      const port = 1337;
+      const opts = {
+        accessKey: 'MY_ACCESS_KEY',
+        secretKey: 'MY_SECRET_KEY',
+        region: 'MY_REGION',
+      };
+
+      const connection = new AwsSigV4DriverRemoteConnection(host, port, opts);
+      expect(connection.url).toEqual(`ws://${host}:${port}/gremlin`);
+      connection._openCallback = jest.fn();
+      connection._connected(connection._socket);
+      expect(connection._openCallback).toHaveBeenCalled();
+    });
   });
 
   describe('open', () => {
@@ -93,6 +110,20 @@ describe('AwsSigV4DriverRemoteConnection', () => {
         .then(() => connection.open())
         .then((result) => {
           expect(result).toEqual(undefined);
+        });
+    });
+
+    it('should reject when error on connection', () => {
+      connection.isOpen = false;
+      const error = new Error('_openCallback error');
+
+      setTimeout(() => {
+        connection._openCallback(error);
+      }, 100);
+
+      return connection.open()
+        .catch((ex) => {
+          expect(ex).toEqual(error);
         });
     });
   });
@@ -397,6 +428,188 @@ describe('AwsSigV4DriverRemoteConnection', () => {
       delete connection._socket;
       connection.close();
       expect(connection.isOpen).toEqual(false);
+    });
+  });
+
+  describe('_disconnected', () => {
+    it('should set the isOpen flag to false when disconnecting', () => {
+      const host = 'local.host';
+      const port = 1337;
+      const opts = {
+        accessKey: 'MY_ACCESS_KEY',
+        secretKey: 'MY_SECRET_KEY',
+        region: 'MY_REGION',
+        autoReconnect: true,
+      };
+
+      const connection = new AwsSigV4DriverRemoteConnection(host, port, opts);
+      expect(connection.url).toEqual(`ws://${host}:${port}/gremlin`);
+      expect(connection.isOpen).toEqual(true);
+      connection._disconnected();
+      expect(connection.isOpen).toEqual(false);
+    });
+  });
+
+  describe('_connectionFailed', () => {
+    it('should try to reconnect when autoReconnect is set to true', () => {
+      const host = 'local.host';
+      const port = 1337;
+      const opts = {
+        accessKey: 'MY_ACCESS_KEY',
+        secretKey: 'MY_SECRET_KEY',
+        region: 'MY_REGION',
+        autoReconnect: true,
+      };
+
+      const connection = new AwsSigV4DriverRemoteConnection(host, port, opts);
+      expect(connection.url).toEqual(`ws://${host}:${port}/gremlin`);
+      expect(connection.traversalSource).toEqual('g');
+      expect(connection.try).toEqual(0);
+      connection._connectionFailed(new Error());
+      expect(connection.try).toEqual(1);
+    });
+
+    it('should not try to reconnect when autoReconnect is set to false', () => {
+      const host = 'local.host';
+      const port = 1337;
+      const opts = {
+        accessKey: 'MY_ACCESS_KEY',
+        secretKey: 'MY_SECRET_KEY',
+        region: 'MY_REGION',
+        autoReconnect: false,
+      };
+
+      const connection = new AwsSigV4DriverRemoteConnection(host, port, opts);
+      connection._openCallback = jest.fn();
+      expect(connection.url).toEqual(`ws://${host}:${port}/gremlin`);
+      expect(connection.traversalSource).toEqual('g');
+      const error = new Error('_connectionFailed error');
+      connection._connectionFailed(error);
+      expect(connection._openCallback).toHaveBeenLastCalledWith(error);
+    });
+
+    it('should not try to reconnect when max connection retries is reached', () => {
+      const host = 'local.host';
+      const port = 1337;
+      const opts = {
+        accessKey: 'MY_ACCESS_KEY',
+        secretKey: 'MY_SECRET_KEY',
+        region: 'MY_REGION',
+        autoReconnect: true,
+        maxRetry: -1,
+      };
+
+      const connection = new AwsSigV4DriverRemoteConnection(host, port, opts);
+      connection._openCallback = undefined;
+      expect(connection.url).toEqual(`ws://${host}:${port}/gremlin`);
+      expect(connection.traversalSource).toEqual('g');
+      const error = new Error('_connectionFailed error');
+      connection._connectionFailed(error);
+    });
+
+    it('should call callback function with error on socket connection failure', () => {
+      const host = 'local.host';
+      const port = 1337;
+      const opts = {
+        accessKey: 'MY_ACCESS_KEY',
+        secretKey: 'MY_SECRET_KEY',
+        region: 'MY_REGION',
+        autoReconnect: true,
+        maxRetry: -1,
+      };
+
+      const connection = new AwsSigV4DriverRemoteConnection(host, port, opts);
+      connection._openCallback = jest.fn();
+      const error = new Error('connectFailed event error');
+      connection.client.topics.connectFailed(error);
+      expect(connection._openCallback).toHaveBeenLastCalledWith(error);
+    });
+  });
+
+  describe('_connectionError', () => {
+    it('should try to reconnect when autoReconnect is set to true', () => {
+      const host = 'local.host';
+      const port = 1337;
+      const opts = {
+        accessKey: 'MY_ACCESS_KEY',
+        secretKey: 'MY_SECRET_KEY',
+        region: 'MY_REGION',
+        autoReconnect: true,
+      };
+
+      const connection = new AwsSigV4DriverRemoteConnection(host, port, opts);
+      expect(connection.url).toEqual(`ws://${host}:${port}/gremlin`);
+      expect(connection.traversalSource).toEqual('g');
+      expect(connection.try).toEqual(0);
+      connection._connectionError(new Error());
+      expect(connection.try).toEqual(1);
+    });
+
+    it('should not try to reconnect when autoReconnect is set to false', () => {
+      const host = 'local.host';
+      const port = 1337;
+      const opts = {
+        accessKey: 'MY_ACCESS_KEY',
+        secretKey: 'MY_SECRET_KEY',
+        region: 'MY_REGION',
+        autoReconnect: false,
+      };
+
+      const connection = new AwsSigV4DriverRemoteConnection(host, port, opts);
+      expect(connection.url).toEqual(`ws://${host}:${port}/gremlin`);
+      expect(connection.traversalSource).toEqual('g');
+      const error = new Error('_connectionError error');
+      expect(() => { connection._connectionError(error); }).toThrow(error);
+    });
+
+    it('should not try to reconnect when max connection retries is reached', () => {
+      const host = 'local.host';
+      const port = 1337;
+      const opts = {
+        accessKey: 'MY_ACCESS_KEY',
+        secretKey: 'MY_SECRET_KEY',
+        region: 'MY_REGION',
+        autoReconnect: true,
+        maxRetry: -1,
+      };
+
+      const connection = new AwsSigV4DriverRemoteConnection(host, port, opts);
+      expect(connection.url).toEqual(`ws://${host}:${port}/gremlin`);
+      expect(connection.traversalSource).toEqual('g');
+      const error = new Error('_connectionError error');
+      expect(() => { connection._connectionError(error); }).toThrow(error);
+    });
+  });
+
+  describe('socket events', () => {
+    class SocketMock extends EventEmitter { }
+
+    test('socket events', () => {
+      const host = 'local.host';
+      const port = 1337;
+      const opts = {
+        accessKey: 'MY_ACCESS_KEY',
+        secretKey: 'MY_SECRET_KEY',
+        region: 'MY_REGION',
+      };
+
+      const connection = new AwsSigV4DriverRemoteConnection(host, port, opts);
+      const socket = new SocketMock();
+      connection._connected(socket);
+
+      connection._disconnected = jest.fn();
+      socket.emit('close');
+      expect(connection._disconnected).toHaveBeenCalled();
+
+      connection._handleMessage = jest.fn();
+      const message = {};
+      socket.emit('message', message);
+      expect(connection._handleMessage).toHaveBeenLastCalledWith(message);
+
+      connection._connectionError = jest.fn();
+      const error = new Error('socket event error');
+      socket.emit('error', error);
+      expect(connection._connectionError).toHaveBeenCalledWith(error);
     });
   });
 });
