@@ -68,8 +68,6 @@ Thses are the available config options, none of them is required.
   maxRetry: 3,
 }
 ```
-+ `` (default: false) 
-+ `maxRetry` (default: 10)
 
 ## Tests
 
