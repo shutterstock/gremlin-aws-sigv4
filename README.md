@@ -57,6 +57,20 @@ These three enviroment variables must be defined.
   connection.close();
 ```
 
+### Additional options
+Thses are the available config options, none of them is required.
+```js
+{
+  // Enable auto-reconnection on connection failure - default: false 
+  autoReconnect: true,
+
+  // Number of auto-reconnection retries - default: 10 
+  maxRetry: 3,
+}
+```
++ `` (default: false) 
++ `maxRetry` (default: 10)
+
 ## Tests
 
 ### Unit tests
