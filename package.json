@@ -28,7 +28,7 @@
   "license": "MIT",
   "dependencies": {
     "debug": "2.6.9",
-    "gremlin": "3.3.4",
+    "gremlin": "^3.4.0",
     "moment-timezone": "0.5.21",
     "websocket": "1.0.26"
   },
