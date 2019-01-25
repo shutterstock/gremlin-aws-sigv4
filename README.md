@@ -18,19 +18,19 @@ These three enviroment variables must be defined.
 ```js
   const gremlin = require('gremlin-aws-sigv4');
 
-  const host = 'your-instance.neptune.amazonaws.com';
-  const port = 8182;
-
-  // creates the connection
   const graph = new gremlin.structure.Graph();
-  const connection = new gremlin.driver.AwsSigV4DriverRemoteConnection(host, port);
-  const g = graph.traversal().withRemote(connection);
-
-  // run the query, here it counts the number of vertices in database
-  const count = await g.V().count().next();
-
-  // close the connection
-  connection.close();
+  const connection = new gremlin.driver.AwsSigV4DriverRemoteConnection(
+    'your-instance.neptune.amazonaws.com', // host
+    8182, // port
+    {}, // options,
+    () => { // connected callback
+      const g = graph.traversal().withRemote(connection);
+      const count = await g.V().count().next();
+      connection.close();
+    }, 
+    (code, message) => { }, // disconnected callback
+    (error) => { } // error callback
+  );
 ```
 
 ### Usage without environment variables
@@ -47,14 +47,22 @@ These three enviroment variables must be defined.
 
   // creates the connection
   const graph = new gremlin.structure.Graph();
-  const connection = new gremlin.driver.AwsSigV4DriverRemoteConnection(host, port, opts);
-  const g = graph.traversal().withRemote(connection);
-
-  // run the query, here it counts the number of vertices in database
-  const count = await g.V().count().next();
-
-  // close the connection
-  connection.close();
+  const connection = new gremlin.driver.AwsSigV4DriverRemoteConnection(
+    'your-instance.neptune.amazonaws.com', // host
+    8182, // port
+    { // options
+      accessKey: 'your-access-key',
+      secretKey: 'your-secret-key',
+      region: 'your-region',
+    },
+    () => { // connected callback
+      const g = graph.traversal().withRemote(connection);
+      const count = await g.V().count().next();
+      connection.close();
+    }, 
+    (code, message) => { }, // disconnected callback
+    (error) => { } // error callback
+  );
 ```
 
 ### Additional options
@@ -77,41 +85,8 @@ Thses are the available config options, none of them is required.
 npm install
 
 # run the tests
-npm run test:unit
-```
-
-### Integration tests
-[Docker](https://www.docker.com/) is required to run integration tests, a [gremlin-server](https://hub.docker.com/r/jbmusso/gremlin-server/) container will be created.
-```bash
-# install dependencies
-npm install
-
-# start docker container
-npm run docker:start
-
-# run the tests
-npm run test:e2e
-
-# stop and delete docker container
-npm run docker:stop
-```
-
-### All tests and coverage
-[Docker](https://www.docker.com/) is required to run all tests, a [gremlin-server](https://hub.docker.com/r/jbmusso/gremlin-server/) container will be created.
-```bash
-# install dependencies
-npm install
-
-# start docker container
-npm run docker:start
-
-# run the tests
 npm run test
-
-# stop and delete docker container
-npm run docker:stop
 ```
-
 
 ## Dependencies
 

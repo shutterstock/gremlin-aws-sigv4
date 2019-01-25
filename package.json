@@ -1,16 +1,10 @@
 {
   "name": "gremlin-aws-sigv4",
-  "version": "3.3.5",
+  "version": "3.4.0",
   "main": "index.js",
   "scripts": {
     "lint": "eslint ./",
-    "test": "jest test/unit",
-    "test:unit": "jest test/unit --collectCoverage false",
-    "test:e2e": "jest test/e2e --collectCoverage false",
-    "docker:start": "docker run -d --name gremlin-server-aws-sigv4 -p 8182:8182 jbmusso/gremlin-server:3.2.4",
-    "docker:stop": "docker stop gremlin-server-aws-sigv4 && docker rm gremlin-server-aws-sigv4",
-    "test:cover": "npm run docker:start && jest test --collectCoverage true; npm run docker:stop",
-    "test:cover:check": "istanbul check-coverage  --statements 100  --branches 100  --functions 100  --lines 100"
+    "test": "jest test/unit"
   },
   "repository": {
     "type": "git",
@@ -28,9 +22,9 @@
   "license": "MIT",
   "dependencies": {
     "debug": "2.6.9",
-    "gremlin": "3.3.4",
+    "gremlin": "3.4.0",
     "moment-timezone": "0.5.21",
-    "websocket": "1.0.26"
+    "request": "2.88.0"
   },
   "devDependencies": {
     "eslint": "^5.4.0",
