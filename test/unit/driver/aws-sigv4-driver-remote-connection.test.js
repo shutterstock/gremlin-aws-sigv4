@@ -16,7 +16,7 @@ describe('AwsSigV4DriverRemoteConnection', () => {
   describe('constructor', () => {
     it('should throw an error when AWS credentials are not provided', () => {
       expect(() => {
-        new AwsSigV4DriverRemoteConnection(HOST, PORT)
+        new AwsSigV4DriverRemoteConnection(HOST, PORT); // eslint-disable-line no-new
       }).toThrow();
     });
 
@@ -30,7 +30,7 @@ describe('AwsSigV4DriverRemoteConnection', () => {
     it('should open socket connection', () => {
       const connection = new AwsSigV4DriverRemoteConnection(HOST, PORT, OPTS);
       connection._connectSocket();
-    })
+    });
   });
 
   describe('_statusCallback', () => {
@@ -134,7 +134,7 @@ describe('AwsSigV4DriverRemoteConnection', () => {
       const opts = Object.assign(OPTS, { autoReconnect: false });
       const connection = new AwsSigV4DriverRemoteConnection(HOST, PORT, opts);
       expect(() => {
-        connection._errorHandler(new Error())
+        connection._errorHandler(new Error());
       }).toThrow();
     });
   });
