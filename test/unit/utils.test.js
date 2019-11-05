@@ -1,10 +1,5 @@
 const utils = require('../../lib/utils');
 
-jest.mock('moment-timezone', () => () => ({
-  utc: jest.fn(() => ({ format: jest.fn(() => '19700101') })),
-  format: jest.fn(() => '19700101'),
-}));
-
 describe('utils', () => {
   describe('uuid', () => {
     it('should return a random uuid', () => {
@@ -15,10 +10,17 @@ describe('utils', () => {
   });
 
   describe('getUrlAndHeaders', () => {
-    it('should return the url and header for connection to Neptune', () => {
-      jest.spyOn(utils, 'hmac');
-      jest.spyOn(utils, 'hash');
+    beforeEach(() => {
+      const RealDate = Date;
+      jest.spyOn(global, 'Date')
+        .mockImplementation(() => new RealDate('1970-01-01T00:00:00.000Z'));
+    });
 
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('should return the url and header for connection to Neptune', () => {
       const host = 'local.host';
       const port = 1337;
       const creds = {
@@ -33,7 +35,7 @@ describe('utils', () => {
       expect(url).toEqual(`ws://${host}:${port}/gremlin`);
 
       expect(headers).toHaveProperty('Host');
-      expect(headers).toHaveProperty('x-amz-date');
+      expect(headers).toHaveProperty('X-Amz-Date');
       expect(headers).toHaveProperty('Authorization');
 
       expect(headers.Host).toContain(host);
@@ -46,9 +48,6 @@ describe('utils', () => {
     });
 
     it('should include the session token if given', () => {
-      jest.spyOn(utils, 'hmac');
-      jest.spyOn(utils, 'hash');
-
       const host = 'local.host';
       const port = 1337;
       const creds = {
@@ -64,9 +63,9 @@ describe('utils', () => {
       expect(url).toEqual(`ws://${host}:${port}/gremlin`);
 
       expect(headers).toHaveProperty('Host');
-      expect(headers).toHaveProperty('x-amz-date');
+      expect(headers).toHaveProperty('X-Amz-Date');
       expect(headers).toHaveProperty('Authorization');
-      expect(headers).toHaveProperty('x-amz-security-token');
+      expect(headers).toHaveProperty('X-Amz-Security-Token');
 
       expect(headers.Host).toContain(host);
       expect(headers.Host).toContain(port);

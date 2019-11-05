@@ -13,7 +13,7 @@ const OPTS = {
 };
 
 describe('AwsSigV4DriverRemoteConnection', () => {
-  beforeEach(() => {
+  afterEach(() => {
     jest.resetAllMocks();
   });
 
@@ -62,7 +62,6 @@ describe('AwsSigV4DriverRemoteConnection', () => {
       // eslint-disable-next-line no-new
       expect(() => new AwsSigV4DriverRemoteConnection(HOST, PORT, OPTS)).toThrow();
     });
-
   });
 
   describe('_connectSocket', () => {
