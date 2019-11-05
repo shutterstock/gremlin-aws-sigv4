@@ -21,6 +21,7 @@
   "author": "Fabrice Lamant <flamant@shutterstock.com>",
   "license": "MIT",
   "dependencies": {
+    "aws4": "^1.8.0",
     "debug": "2.6.9",
     "gremlin": "3.4.0",
     "moment-timezone": "0.5.21",
