@@ -13,10 +13,14 @@ const OPTS = {
 };
 
 describe('AwsSigV4DriverRemoteConnection', () => {
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
   describe('constructor', () => {
     it('should throw an error when AWS credentials are not provided', () => {
       expect(() => {
-        new AwsSigV4DriverRemoteConnection(HOST, PORT)
+        new AwsSigV4DriverRemoteConnection(HOST, PORT); // eslint-disable-line no-new
       }).toThrow();
     });
 
@@ -26,11 +30,57 @@ describe('AwsSigV4DriverRemoteConnection', () => {
     });
   });
 
+  describe('_connect', () => {
+    it('should make a get request to the /status endpoint and connect the socket if successful', () => {
+      request.get.mockImplementation(({ url }, callback) => {
+        if (url === `http://${HOST}:${PORT}/status`) {
+          callback(null, { statusCode: 200 }, null);
+        }
+      });
+      // eslint-disable-next-line no-new
+      const connection = new AwsSigV4DriverRemoteConnection(HOST, PORT, OPTS);
+      expect(connection).toHaveProperty('_client');
+    });
+
+    it('should make a get request to the /status endpoint using secure HTTPS if secure is set', () => {
+      request.get.mockImplementation(({ url }, callback) => {
+        if (url === `https://${HOST}:${PORT}/status`) {
+          callback(null, { statusCode: 200 }, null);
+        }
+      });
+      // eslint-disable-next-line no-new
+      const connection = new AwsSigV4DriverRemoteConnection(HOST, PORT, { ...OPTS, secure: true });
+      expect(connection).toHaveProperty('_client');
+    });
+
+    it('should make a get request to the /status endpoint and throw an error if not sucessful', () => {
+      request.get.mockImplementation(({ url }, callback) => {
+        if (url === `http://${HOST}:${PORT}/status`) {
+          callback(null, { statusCode: 403 }, null);
+        }
+      });
+      // eslint-disable-next-line no-new
+      expect(() => new AwsSigV4DriverRemoteConnection(HOST, PORT, OPTS)).toThrow();
+    });
+  });
+
   describe('_connectSocket', () => {
     it('should open socket connection', () => {
       const connection = new AwsSigV4DriverRemoteConnection(HOST, PORT, OPTS);
       connection._connectSocket();
-    })
+    });
+
+    it('should specify the default /gremlin endpoint for the connection', () => {
+      const connection = new AwsSigV4DriverRemoteConnection(HOST, PORT, OPTS);
+      connection._connectSocket();
+      expect(connection._client._connection.url).toEqual(`ws://${HOST}:${PORT}/gremlin`);
+    });
+
+    it('should use the secure WSS protocol for the connection when the secure option is specified', () => {
+      const connection = new AwsSigV4DriverRemoteConnection(HOST, PORT, { ...OPTS, secure: true });
+      connection._connectSocket();
+      expect(connection._client._connection.url).toEqual(`wss://${HOST}:${PORT}/gremlin`);
+    });
   });
 
   describe('_statusCallback', () => {
@@ -134,7 +184,7 @@ describe('AwsSigV4DriverRemoteConnection', () => {
       const opts = Object.assign(OPTS, { autoReconnect: false });
       const connection = new AwsSigV4DriverRemoteConnection(HOST, PORT, opts);
       expect(() => {
-        connection._errorHandler(new Error())
+        connection._errorHandler(new Error());
       }).toThrow();
     });
   });
