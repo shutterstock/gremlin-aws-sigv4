@@ -4,7 +4,10 @@
   "main": "index.js",
   "scripts": {
     "lint": "eslint ./",
-    "test": "jest test/unit"
+    "lint:fix": "eslint ./ --fix",
+    "test": "jest test",
+    "test:unit": "jest test/unit",
+    "test:e2e": "jest test/e2e"
   },
   "repository": {
     "type": "git",
@@ -21,17 +24,17 @@
   "author": "Fabrice Lamant <flamant@shutterstock.com>",
   "license": "MIT",
   "dependencies": {
-    "aws4": "^1.8.0",
-    "debug": "2.6.9",
+    "aws4": "^1.10.1",
+    "debug": "^4.2.0",
     "gremlin": "3.4.0",
     "request": "2.88.0"
   },
   "devDependencies": {
-    "eslint": "^5.4.0",
-    "eslint-config-airbnb-base": "^13.1.0",
-    "eslint-plugin-import": "^2.14.0",
-    "istanbul": "^0.4.5",
-    "jest": "^24.9.0"
+    "dotenv": "^8.2.0",
+    "eslint": "^7.11.0",
+    "eslint-config-airbnb-base": "^14.2.0",
+    "eslint-plugin-import": "^2.22.1",
+    "jest": "^26.5.3"
   },
   "jest": {
     "collectCoverageFrom": [
@@ -40,6 +43,9 @@
     "coveragePathIgnorePatterns": [
       "coverage"
     ],
-    "collectCoverage": true
+    "collectCoverage": true,
+    "setupFiles": [
+      "./jest.setup.js"
+    ]
   }
 }
