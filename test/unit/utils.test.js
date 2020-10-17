@@ -20,6 +20,10 @@ describe('utils', () => {
       jest.restoreAllMocks();
     });
 
+    it('should throw an error if host or port are not defined', () => {
+      expect(() => utils.getUrlAndHeaders(null, null, {}, '', '')).toThrow('Host and port are required');
+    });
+
     it('should return the url and header for connection to Neptune', () => {
       const host = 'local.host';
       const port = 1337;
