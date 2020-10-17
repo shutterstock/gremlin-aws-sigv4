@@ -1,4 +1,4 @@
-const gremlin = require('../../');
+const gremlin = require('../..');
 
 describe('gremlin-aws-sigv4', () => {
   it('should attach to the gremlin driver', () => {
