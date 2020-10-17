@@ -20,16 +20,27 @@ These three enviroment variables must be defined.
 
   const graph = new gremlin.structure.Graph();
   const connection = new gremlin.driver.AwsSigV4DriverRemoteConnection(
-    'your-instance.neptune.amazonaws.com', // host
-    8182, // port
-    {}, // options,
-    () => { // connected callback
+    // host
+    'your-instance.neptune.amazonaws.com', 
+
+    // port
+    8182,
+
+    // options, 
+    {}, 
+
+    // connected callback
+    () => { 
       const g = graph.traversal().withRemote(connection);
       const count = await g.V().count().next();
       connection.close();
     }, 
-    (code, message) => { }, // disconnected callback
-    (error) => { } // error callback
+
+    // disconnected callback
+    (code, message) => { }, 
+
+    // error callback
+    (error) => { } 
   );
 ```
 
@@ -37,31 +48,35 @@ These three enviroment variables must be defined.
 ```js
   const gremlin = require('gremlin-aws-sigv4');
 
-  const host = 'your-instance.neptune.amazonaws.com';
-  const port = 8182;
-  const opts = {
-    accessKey: 'your-access-key',
-    secretKey: 'your-secret-key',
-    region: 'your-region',
-  };
-
   // creates the connection
   const graph = new gremlin.structure.Graph();
   const connection = new gremlin.driver.AwsSigV4DriverRemoteConnection(
-    'your-instance.neptune.amazonaws.com', // host
-    8182, // port
-    { // options
-      accessKey: 'your-access-key',
-      secretKey: 'your-secret-key',
+    // host
+    'your-instance.neptune.amazonaws.com',
+
+    // port
+    8182, 
+    
+    // options
+    { 
+      accessKeyId: 'your-access-key',
+      secretAccessKey: 'your-secret-key',
+      sessionToken: 'your-optional-session-token',
       region: 'your-region',
     },
-    () => { // connected callback
+    
+    // connected callback
+    () => { 
       const g = graph.traversal().withRemote(connection);
       const count = await g.V().count().next();
       connection.close();
     }, 
-    (code, message) => { }, // disconnected callback
-    (error) => { } // error callback
+    
+    // disconnected callback
+    (code, message) => { }, 
+    
+     // error callback
+     (error) => { }
   );
 ```
 
@@ -69,6 +84,9 @@ These three enviroment variables must be defined.
 Thses are the available config options, none of them is required.
 ```js
 {
+  // Open secure connection - mandatory for engine version 1.0.4.0 and above
+  secure: true,
+
   // Enable auto-reconnection on connection failure - default: false 
   autoReconnect: true,
 
@@ -85,14 +103,14 @@ Thses are the available config options, none of them is required.
 npm install
 
 # run the tests
-npm run test
+npm run test:unit
 ```
 
 ## Dependencies
 
+- [aws4](https://www.npmjs.com/package/aws4)
+- [debug](https://www.npmjs.com/package/debug)
 - [gremlin](https://www.npmjs.com/package/gremlin)
-- [moment-timezone](https://www.npmjs.com/package/moment-timezone)
-- [websocket](https://www.npmjs.com/package/websocket)
 
 ## Contribute
 Please do contribute! Open an issue or submit a pull request.
