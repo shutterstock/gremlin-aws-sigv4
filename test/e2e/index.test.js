@@ -10,7 +10,7 @@ const connect = (host, port, opts) => new Promise((resolve, reject) => {
   );
 });
 
-test('connection', async () => {
+test('connect, run a simple query and disconnect', async () => {
   const { connection, g } = await connect(
     process.env.TEST_HOST,
     process.env.TEST_PORT,
