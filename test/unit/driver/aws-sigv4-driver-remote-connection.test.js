@@ -1,5 +1,6 @@
 /* eslint-disable-line no-new */
 const gremlin = require('gremlin');
+
 const utils = require('../../../lib/utils');
 
 jest.mock('../../../lib/utils', () => ({
@@ -37,19 +38,19 @@ describe('AwsSigV4DriverRemoteConnection', () => {
 
   describe('_connect', () => {
     it('should make a get request to the /status endpoint and connect the socket if successful', () => {
-      utils.request.mockImplementation((url, options, secure, cb) => { cb(null, { statusCode: 200 }, 'hello world'); });
+      utils.request.mockImplementation((url, options, cb) => { cb(null, { statusCode: 200 }, 'hello world'); });
       const connection = new AwsSigV4DriverRemoteConnection(HOST, PORT, OPTS);
       expect(connection).toHaveProperty('_client');
     });
 
     it('should make a get request to the /status endpoint using secure HTTPS if secure is set', () => {
-      utils.request.mockImplementation((url, options, secure, cb) => { cb(null, { statusCode: 200 }, 'hello world'); });
+      utils.request.mockImplementation((url, options, cb) => { cb(null, { statusCode: 200 }, 'hello world'); });
       const connection = new AwsSigV4DriverRemoteConnection(HOST, PORT, { ...OPTS, secure: true });
       expect(connection).toHaveProperty('_client');
     });
 
     it('should make a get request to the /status endpoint and throw an error if not sucessful', () => {
-      utils.request.mockImplementation((url, options, secure, cb) => { cb(null, { statusCode: 403 }, 'hello world'); });
+      utils.request.mockImplementation((url, options, cb) => { cb(null, { statusCode: 403 }, 'hello world'); });
       expect(() => new AwsSigV4DriverRemoteConnection(HOST, PORT, OPTS)).toThrow();
     });
   });
