@@ -1,14 +1,13 @@
 /* eslint-disable-line no-new */
 const gremlin = require('gremlin');
-
 const utils = require('../../../lib/utils');
+const AwsSigV4DriverRemoteConnection = require('../../../lib/driver/aws-sigv4-driver-remote-connection');
 
+jest.mock('gremlin');
 jest.mock('../../../lib/utils', () => ({
   ...jest.requireActual('../../../lib/utils'),
   request: jest.fn(),
 }));
-
-const AwsSigV4DriverRemoteConnection = require('../../../lib/driver/aws-sigv4-driver-remote-connection');
 
 const HOST = 'aws.dev.gremlin';
 const PORT = 8182;
@@ -21,6 +20,15 @@ const OPTS = {
 describe('AwsSigV4DriverRemoteConnection', () => {
   afterEach(() => {
     jest.resetAllMocks();
+    gremlin.driver.Client.mockImplementation((url) => ({
+      _connection: {
+        url,
+        on: jest.fn(),
+        _ws: {
+          on: jest.fn(),
+        },
+      },
+    }));
   });
 
   describe('constructor', () => {
@@ -32,7 +40,7 @@ describe('AwsSigV4DriverRemoteConnection', () => {
 
     it('should accept options', () => {
       const connection = new AwsSigV4DriverRemoteConnection(HOST, PORT, OPTS);
-      expect(connection.url).toEqual(`ws://${HOST}:${PORT}/gremlin`);
+      expect(connection.options).toEqual(OPTS);
     });
   });
 
