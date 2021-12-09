@@ -1,6 +1,6 @@
 {
   "name": "gremlin-aws-sigv4",
-  "version": "3.4.8",
+  "version": "3.5.1",
   "main": "index.js",
   "scripts": {
     "lint": "eslint ./",
