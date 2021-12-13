@@ -1,4 +1,15 @@
+const nock = require('nock');
+const http = require('http');
+const https = require('https');
+
+const httpGetSpy = jest.spyOn(http, 'get');
+const httpsGetSpy = jest.spyOn(https, 'get');
+
 const utils = require('../../lib/utils');
+
+afterEach(() => {
+  jest.clearAllMocks();
+});
 
 describe('utils', () => {
   describe('uuid', () => {
@@ -78,6 +89,57 @@ describe('utils', () => {
           + `Credential=${creds.accessKey}/19700101/${creds.region}/neptune-db/aws4_request, `
           + 'SignedHeaders=host;x-amz-date;x-amz-security-token, '
           + 'Signature=');
+    });
+  });
+
+  describe('request', () => {
+    const httpHost = 'http://localhost';
+    const httpsHost = 'https://localhost';
+
+    it('should use http for http requests', async () => {
+      nock(httpHost).get('/').reply(200, 'ok');
+
+      const result = await new Promise((resolve) => {
+        utils.request(`${httpHost}/`, {}, (error, response, body) => {
+          resolve({ error, response, body });
+        });
+      });
+
+      expect(result.error).toBeNull();
+      expect(result.response).not.toBeNull();
+      expect(result.body).not.toBeNull();
+
+      expect(result.response.socket.remotePort).toEqual(80);
+    });
+
+    it('should use https for https requests', async () => {
+      nock(httpsHost).get('/').reply(200, 'ok');
+
+      const result = await new Promise((resolve) => {
+        utils.request(`${httpsHost}/`, {}, (error, response, body) => {
+          resolve({ error, response, body });
+        });
+      });
+
+      expect(result.error).toBeNull();
+      expect(result.response).not.toBeNull();
+      expect(result.body).not.toBeNull();
+
+      expect(result.response.socket.remotePort).toEqual(443);
+    });
+
+    it('should pass errors to callback function', async () => {
+      nock(httpsHost).get('/').replyWithError('oops');
+
+      const result = await new Promise((resolve) => {
+        utils.request(`${httpsHost}/`, {}, (error, response, body) => {
+          resolve({ error, response, body });
+        });
+      });
+
+      expect(result.error).not.toBeNull();
+      expect(result.response).toBeNull();
+      expect(result.body).toBeNull();
     });
   });
 });
