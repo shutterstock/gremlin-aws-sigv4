@@ -18,7 +18,7 @@ const OPTS = {
 };
 
 describe('AwsSigV4DriverRemoteConnection', () => {
-  afterEach(() => {
+  beforeEach(() => {
     jest.resetAllMocks();
     gremlin.driver.Client.mockImplementation((url) => ({
       _connection: {
@@ -28,6 +28,9 @@ describe('AwsSigV4DriverRemoteConnection', () => {
           on: jest.fn(),
         },
       },
+      open: jest.fn(),
+      submit: jest.fn(() => Promise.resolve({ toArray: jest.fn() })),
+      close: jest.fn(),
     }));
   });
 
@@ -215,6 +218,24 @@ describe('AwsSigV4DriverRemoteConnection', () => {
       const submit = jest.fn(() => Promise.resolve(new gremlin.driver.ResultSet([], null)));
       connection._client = { submit };
       connection.submit(null);
+    });
+
+    it('should reopen the connection and submit the query  if autoReconnect is true', () => {
+      const connection = new AwsSigV4DriverRemoteConnection(
+        HOST, PORT, { ...OPTS, autoReconnect: true },
+      );
+      connection._client = null;
+      connection.submit(null);
+    });
+
+    it('should fail if autoReconnect is false', () => {
+      const connection = new AwsSigV4DriverRemoteConnection(
+        HOST, PORT, { ...OPTS, autoReconnect: false },
+      );
+      connection._client = null;
+      connection.submit(null).catch((error) => {
+        expect(error.toString()).toContain('Disconnected from database');
+      });
     });
   });
 
