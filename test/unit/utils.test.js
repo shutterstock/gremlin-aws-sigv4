@@ -11,8 +11,7 @@ describe('utils', () => {
     it('should return a random uuid', () => {
       const result = utils.uuid();
       expect(result).toHaveLength(36);
-      expect(result)
-        .toMatch(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/);
+      expect(result).toMatch(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/);
     });
   });
 
