@@ -25,7 +25,7 @@ describe('AwsSigV4DriverRemoteConnection', () => {
         url,
         on: jest.fn(),
         _ws: {
-          on: jest.fn(),
+          on: jest.fn((event, cb) => { if (event === 'open') { cb(); } }),
         },
       },
       open: jest.fn(),
@@ -203,12 +203,9 @@ describe('AwsSigV4DriverRemoteConnection', () => {
   });
 
   describe('open', () => {
-    it('should open the client connection', () => {
-      const connection = new AwsSigV4DriverRemoteConnection(HOST, PORT, OPTS);
-      const open = jest.fn();
-      connection._client = { open };
+    it('should open the client connection', (done) => {
+      const connection = new AwsSigV4DriverRemoteConnection(HOST, PORT, { ...OPTS, openOnStartup: false }, () => { expect(1).toEqual(1); done(); });
       connection.open();
-      expect(open).toHaveBeenCalled();
     });
   });
 
@@ -221,17 +218,13 @@ describe('AwsSigV4DriverRemoteConnection', () => {
     });
 
     it('should reopen the connection and submit the query  if autoReconnect is true', () => {
-      const connection = new AwsSigV4DriverRemoteConnection(
-        HOST, PORT, { ...OPTS, autoReconnect: true },
-      );
+      const connection = new AwsSigV4DriverRemoteConnection(HOST, PORT, { ...OPTS, autoReconnect: true });
       connection._client = null;
       connection.submit(null);
     });
 
     it('should fail if autoReconnect is false', () => {
-      const connection = new AwsSigV4DriverRemoteConnection(
-        HOST, PORT, { ...OPTS, autoReconnect: false },
-      );
+      const connection = new AwsSigV4DriverRemoteConnection(HOST, PORT, { ...OPTS, autoReconnect: false });
       connection._client = null;
       connection.submit(null).catch((error) => {
         expect(error.toString()).toContain('Disconnected from database');

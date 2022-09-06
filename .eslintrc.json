@@ -5,6 +5,12 @@
     "jest": true
   },
   "rules": {
-    "no-underscore-dangle": 0
+    "no-underscore-dangle": 0,
+    "max-len": [
+      "error",
+      {
+        "code": 160
+      }
+    ]
   }
 }
