@@ -25,7 +25,7 @@ describe('AwsSigV4DriverRemoteConnection', () => {
         url,
         on: jest.fn(),
         _ws: {
-          on: jest.fn(),
+          on: jest.fn((event, cb) => { if (event === 'open') { cb(); } }),
         },
       },
       open: jest.fn(),
@@ -203,8 +203,8 @@ describe('AwsSigV4DriverRemoteConnection', () => {
   });
 
   describe('open', () => {
-    it('should open the client connection', () => {
-      const connection = new AwsSigV4DriverRemoteConnection(HOST, PORT, { ...OPTS, openOnStartup: false }, () => { expect(1).toEqual(1); });
+    it('should open the client connection', (done) => {
+      const connection = new AwsSigV4DriverRemoteConnection(HOST, PORT, { ...OPTS, openOnStartup: false }, () => { expect(1).toEqual(1); done(); });
       connection.open();
     });
   });
