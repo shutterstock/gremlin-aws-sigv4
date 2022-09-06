@@ -3,7 +3,9 @@ const gremlin = require('../..');
 const connect = (host, port, opts) => new Promise((resolve, reject) => {
   const graph = new gremlin.structure.Graph();
   const connection = new gremlin.driver.AwsSigV4DriverRemoteConnection(
-    host, port, opts,
+    host,
+    port,
+    opts,
     () => { resolve({ connection, g: graph.traversal().withRemote(connection) }); },
     (code, message) => { reject(new Error({ code, message })); },
     (err) => { reject(err); },

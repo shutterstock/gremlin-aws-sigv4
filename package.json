@@ -1,13 +1,17 @@
 {
   "name": "gremlin-aws-sigv4",
-  "version": "3.5.2",
+  "version": "3.6.1",
   "main": "index.js",
   "scripts": {
     "lint": "eslint ./",
     "lint:fix": "eslint ./ --fix",
     "test": "jest test",
     "test:unit": "jest test/unit",
-    "test:e2e": "jest test/e2e"
+    "test:e2e": "jest test/e2e",
+    "prepare": "is-ci || husky install"
+  },
+  "lint-staged": {
+    "*.js": "eslint --fix"
   },
   "repository": {
     "type": "git",
@@ -25,16 +29,19 @@
   "license": "MIT",
   "dependencies": {
     "aws4": "^1.11.0",
-    "debug": "^4.2.0",
-    "gremlin": "^3.5.1"
+    "debug": "^4.3.4",
+    "gremlin": "^3.6.1"
   },
   "devDependencies": {
-    "dotenv": "^8.6.0",
-    "eslint": "^7.32.0",
-    "eslint-config-airbnb-base": "^14.2.1",
-    "eslint-plugin-import": "^2.25.3",
-    "jest": "^26.6.3",
-    "nock": "^13.2.1"
+    "dotenv": "^16.0.2",
+    "eslint": "^8.23.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.26.0",
+    "husky": "^8.0.1",
+    "is-ci": "^3.0.1",
+    "jest": "^29.0.2",
+    "lint-staged": "^13.0.3",
+    "nock": "^13.2.9"
   },
   "jest": {
     "collectCoverageFrom": [

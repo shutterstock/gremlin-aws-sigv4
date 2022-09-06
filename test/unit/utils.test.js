@@ -1,9 +1,4 @@
 const nock = require('nock');
-const http = require('http');
-const https = require('https');
-
-const httpGetSpy = jest.spyOn(http, 'get');
-const httpsGetSpy = jest.spyOn(https, 'get');
 
 const utils = require('../../lib/utils');
 
@@ -16,7 +11,8 @@ describe('utils', () => {
     it('should return a random uuid', () => {
       const result = utils.uuid();
       expect(result).toHaveLength(36);
-      expect(result).toMatch(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/);
+      expect(result)
+        .toMatch(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/);
     });
   });
 
@@ -46,7 +42,7 @@ describe('utils', () => {
       const { url, headers } = utils.getUrlAndHeaders(host, port, creds, '/gremlin', 'ws');
 
       expect(url).toContain(host);
-      expect(url).toContain(port);
+      expect(url).toContain(`${port}`);
       expect(url).toEqual(`ws://${host}:${port}/gremlin`);
 
       expect(headers).toHaveProperty('Host');
@@ -54,7 +50,7 @@ describe('utils', () => {
       expect(headers).toHaveProperty('Authorization');
 
       expect(headers.Host).toContain(host);
-      expect(headers.Host).toContain(port);
+      expect(headers.Host).toContain(`${port}`);
       expect(headers.Authorization)
         .toContain('AWS4-HMAC-SHA256 '
           + `Credential=${creds.accessKey}/19700101/${creds.region}/neptune-db/aws4_request, `
@@ -74,7 +70,7 @@ describe('utils', () => {
       const { url, headers } = utils.getUrlAndHeaders(host, port, creds, '/gremlin', 'ws');
 
       expect(url).toContain(host);
-      expect(url).toContain(port);
+      expect(url).toContain(`${port}`);
       expect(url).toEqual(`ws://${host}:${port}/gremlin`);
 
       expect(headers).toHaveProperty('Host');
@@ -83,7 +79,7 @@ describe('utils', () => {
       expect(headers).toHaveProperty('X-Amz-Security-Token');
 
       expect(headers.Host).toContain(host);
-      expect(headers.Host).toContain(port);
+      expect(headers.Host).toContain(`${port}`);
       expect(headers.Authorization)
         .toContain('AWS4-HMAC-SHA256 '
           + `Credential=${creds.accessKey}/19700101/${creds.region}/neptune-db/aws4_request, `
