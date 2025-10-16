@@ -1,6 +1,6 @@
 {
   "name": "gremlin-aws-sigv4",
-  "version": "3.6.1",
+  "version": "3.7.4",
   "main": "index.js",
   "scripts": {
     "lint": "eslint ./",
@@ -28,9 +28,9 @@
   "author": "Fabrice Lamant <flamant@shutterstock.com>",
   "license": "MIT",
   "dependencies": {
-    "aws4": "^1.11.0",
-    "debug": "^4.3.4",
-    "gremlin": "^3.6.1"
+    "aws4": "^1.13.2",
+    "debug": "^4.4.3",
+    "gremlin": "^3.7.4"
   },
   "devDependencies": {
     "dotenv": "^16.0.2",

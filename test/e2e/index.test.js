@@ -12,7 +12,12 @@ const connect = (host, port, opts) => new Promise((resolve, reject) => {
   );
 });
 
-test('connect, run a simple query and disconnect', async () => {
+const requiredEnv = ['TEST_HOST', 'TEST_PORT', 'TEST_ACCESS_KEY_ID', 'TEST_SECRET_ACCESS_KEY', 'TEST_REGION'];
+const hasEnv = requiredEnv.every((k) => process.env[k]);
+
+const maybeTest = hasEnv ? test : test.skip;
+
+maybeTest('connect, run a simple query and disconnect', async () => {
   const { connection, g } = await connect(
     process.env.TEST_HOST,
     process.env.TEST_PORT,
