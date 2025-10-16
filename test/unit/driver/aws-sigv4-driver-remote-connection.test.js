@@ -20,18 +20,20 @@ const OPTS = {
 describe('AwsSigV4DriverRemoteConnection', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    gremlin.driver.Client.mockImplementation((url) => ({
-      _connection: {
-        url,
-        on: jest.fn(),
-        _ws: {
-          on: jest.fn((event, cb) => { if (event === 'open') { cb(); } }),
+    gremlin.driver.Client.mockImplementation((url) => {
+      const client = {
+        _connection: {
+          url,
+          on: jest.fn(),
+          isOpen: true,
         },
-      },
-      open: jest.fn(),
-      submit: jest.fn(() => Promise.resolve({ toArray: jest.fn() })),
-      close: jest.fn(),
-    }));
+        // Simulate public open() resolving successfully
+        open: jest.fn(() => Promise.resolve()),
+        submit: jest.fn(() => Promise.resolve({ toArray: jest.fn() })),
+        close: jest.fn(),
+      };
+      return client;
+    });
   });
 
   describe('constructor', () => {
@@ -44,6 +46,13 @@ describe('AwsSigV4DriverRemoteConnection', () => {
     it('should accept options', () => {
       const connection = new AwsSigV4DriverRemoteConnection(HOST, PORT, OPTS);
       expect(connection.options).toEqual(OPTS);
+    });
+
+    it('should remove connectOnStartup from clientOptions when explicitly provided', () => {
+      const opts = { ...OPTS, connectOnStartup: false };
+      const connection = new AwsSigV4DriverRemoteConnection(HOST, PORT, opts);
+      // Ensure the cleanup code ran and property is not present on clientOptions
+      expect(connection.clientOptions.connectOnStartup).toBeUndefined();
     });
   });
 
@@ -82,6 +91,23 @@ describe('AwsSigV4DriverRemoteConnection', () => {
       const connection = new AwsSigV4DriverRemoteConnection(HOST, PORT, { ...OPTS, secure: true });
       connection._connectSocket();
       expect(connection._client._connection.url).toEqual(`wss://${HOST}:${PORT}/gremlin`);
+    });
+
+    it('should call _errorHandler when client.open() rejects', async () => {
+      // Override mock to reject open
+      const rejectingClient = {
+        _connection: { url: `ws://${HOST}:${PORT}/gremlin`, on: jest.fn(), isOpen: false },
+        open: jest.fn(() => Promise.reject(new Error('open failed'))),
+        submit: jest.fn(() => Promise.resolve({ toArray: jest.fn() })),
+        close: jest.fn(),
+      };
+      gremlin.driver.Client.mockImplementationOnce(() => rejectingClient);
+      const connection = new AwsSigV4DriverRemoteConnection(HOST, PORT, { ...OPTS, connectOnStartup: false });
+      jest.spyOn(connection, '_errorHandler').mockImplementation(() => {});
+      connection._connectSocket();
+      // Wait for the promise chain in _connectSocket to settle
+      await new Promise((resolve) => { setImmediate(() => resolve()); });
+      expect(connection._errorHandler).toHaveBeenCalled();
     });
   });
 
